@@ -9,9 +9,9 @@ export class Contact {
   @Property({ type: 'varchar', length: 30, nullable: true })
   email!: string;
 
-  @Property()
+  @Property({ nullable: true })
   phone!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: true })
   user!: User;
 }
