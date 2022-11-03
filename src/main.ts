@@ -32,7 +32,7 @@ const typeDefs = `#graphql
   # clients can execute, along with the return type for each. In this
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    getUsers: [User]
+    getUsers(includeContact: Boolean = true): [User]
     getContacts: [Contact]
   }
 
@@ -47,8 +47,13 @@ function createResolvers(em: Awaited<ReturnType<typeof MikroORM.init<PostgreSqlD
   const resolvers: ApolloServerOptions<BaseContext>['resolvers'] = {
     Query: {
       getUsers: async (_, args) => {
+        const { includeContact } = args
+        const includeFields: any = [];
+        if (includeContact) includeFields.push('contacts');
+
         const fork = em.fork();
-        const [users, count] = await fork.findAndCount(User, {});
+        // This should be fixed by doing a join - 100% there's a normal way that i'm missing
+        const [users, count] = await fork.findAndCount(User, {}, { fields: ['name', 'id', ...includeFields,] });
         return users;
       },
       getContacts: async (_, args) => {
